@@ -1,0 +1,33 @@
+{
+    "name": "beriyack/jamfapi",
+    "description": "Une bibliothèque PHP pour interagir avec l'API de Jamf.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Beriyack\\": "src/Beriyack"
+        }
+    },
+    "authors": [
+        {
+            "name": "Beriyack"
+        }
+    ],
+    "keywords": [
+        "jamf",
+        "jamf pro",
+        "mdm",
+        "api",
+        "sdk",
+        "php",
+        "zuludesk",
+        "apple",
+        "device management"
+    ],
+    "require": {
+        "php": ">=7.4",
+        "beriyack/apiclient": "^1.0"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
