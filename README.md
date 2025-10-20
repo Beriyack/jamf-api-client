@@ -1,6 +1,6 @@
-# 🚀 PHP Jamf Api
+# 🚀 Jamf API Client for PHP
 
-Une bibliothèque PHP simple pour interagir avec l'API de Jamf (apiv6.zuludesk.com), basée sur une classe `ApiClient` générique.
+Une bibliothèque PHP pour interagir avec l'API de Jamf (apiv6.zuludesk.com). Elle est construite sur le client HTTP générique `beriyack/api-client` pour fournir des méthodes spécifiques à Jamf.
 
 ---
 
@@ -8,11 +8,11 @@ Une bibliothèque PHP simple pour interagir avec l'API de Jamf (apiv6.zuludesk.c
 
 Cette bibliothèque est conçue pour être facilement installable via Composer.
 
-1.  **Exigence :** Assurez-vous d'avoir [Composer](https://getcomposer.org/) installé sur votre système.
+1.  **Exigence :** Assurez-vous d'avoir Composer installé sur votre système.
 2.  **Ajoutez la dépendance** à votre projet via Composer :
 
     ```bash
-    composer require beriyack/jamfapi
+    composer require beriyack/jamf-api-client
     ```
 
     Cela installera la librairie dans votre dossier `vendor/` et mettra à jour l'autoloader de Composer.
@@ -23,7 +23,7 @@ Cette bibliothèque est conçue pour être facilement installable via Composer.
     <?php
     require_once 'vendor/autoload.php';
 
-    use Beriyack\JamfAPI;
+    use Beriyack\Jamf\JamfApiClient;
     ?>
     ```
 
@@ -31,56 +31,45 @@ Cette bibliothèque est conçue pour être facilement installable via Composer.
 
 ## 📖 Utilisation
 
-Après l'installation via Composer, vous devez instancier la classe `JamfApi`.
+Après l'installation via Composer, vous devez instancier la classe `JamfApiClient`.
 
 ### Exemple de code
+
+Le client est configuré lors de son instanciation avec vos identifiants et, si nécessaire, un certificat SSL.
 
 ```php
 <?php
 
 require_once __DIR__ . '/vendor/autoload.php'; // Inclut l'autoloader de Composer
 
-use Beriyack\JamfApi;
+use Beriyack\Jamf\JamfApiClient;
+use Exception;
 
 // Vos identifiants Jamf
 $networkId = 'VOTRE_NETWORK_ID'; // Remplacez par votre Network ID Jamf
 $key = 'VOTRE_CLE_API';         // Remplacez par votre clé d'API Jamf
-// Avec le certificat pour l'environnemnt de développement local
-// Pour l'environnement de production, le certificat n'est pas nécessaire
-$caCertPath = __DIR__ . '/Amazon Root CA 1.crt'; // Chemin absolu vers votre fichier .crt
 
-// Assurez-vous que le fichier de certificat existe
-if (!file_exists($caCertPath)) {
-    die("Erreur: Le fichier de certificat CA n'a pas été trouvé à l'emplacement: " . $caCertPath);
-}
+// Optionnel : Chemin vers votre certificat CA pour un environnement de développement local.
+// Laissez `null` si vous êtes en production ou si votre système a déjà les bons certificats.
+$caCertPath = __DIR__ . '/path/to/your/Amazon Root CA 1.crt';
 
 try {
-    // Instanciez la bibliothèque JamfApi
-    $jamf = new JamfApi($networkId, $key, $caCertPath);
+    // Instanciez le client Jamf
+    // Le constructeur vérifiera si le fichier de certificat existe.
+    $jamf = new JamfApiClient($networkId, $key, $caCertPath);
 
     // --- Exemple 1: Récupérer toutes les applications ---
     echo "Récupération des applications...\n";
     $apps = $jamf->getApps();
-
-    if ($apps) {
-        echo "Applications trouvées:\n";
-        print_r($apps);
-    } else {
-        echo "Aucune application trouvée ou erreur lors de la récupération.\n";
-    }
+    print_r($apps);
 
     echo "\n";
 
-    // --- Exemple 2: Requête GET générique pour un autre endpoint (si disponible) ---
-    // Supposons un endpoint '/devices' existe et retourne des données
+    // --- Exemple 2: Récupérer tous les appareils ---
     echo "Récupération des appareils...\n";
-    $devices = $jamf->get('/devices');
-    if ($devices) {
-        echo "Appareils trouvés:\n";
-        print_r($devices);
-    } else {
-        echo "Aucun appareil trouvé ou erreur lors de la récupération.\n";
-    }
+    $devices = $jamf->getDevices();
+    print_r($devices);
+
 } catch (Exception $e) {
     echo "Une erreur est survenue : " . $e->getMessage() . "\n";
 }
@@ -88,6 +77,29 @@ try {
 ?>
 ```
 
+### Opérations CRUD génériques
+
+En plus des méthodes spécifiques comme `getApps()`, le client expose les méthodes `get`, `post`, `put`, et `delete` pour interagir avec n'importe quel endpoint de l'API.
+
+```php
+try {
+    // Créer une nouvelle ressource (ex: un appareil)
+    $newDeviceData = ['name' => 'Nouveau iPad', 'asset_tag' => '12345'];
+    $createdDevice = $jamf->post('/devices', $newDeviceData);
+    echo "Appareil créé avec l'ID : " . $createdDevice['id'] . "\n";
+
+    // Mettre à jour cette ressource
+    $updatedData = ['name' => 'iPad de la salle de conférence'];
+    $jamf->put('/devices/' . $createdDevice['id'], $updatedData);
+    echo "Appareil mis à jour.\n";
+
+    // Supprimer la ressource
+    $jamf->delete('/devices/' . $createdDevice['id']);
+    echo "Appareil supprimé.\n";
+} catch (Exception $e) {
+    echo "Une erreur CRUD est survenue : " . $e->getMessage() . "\n";
+}
+```
 ---
 
 ## 🤝 Contribution
@@ -98,7 +110,7 @@ Les contributions sont les bienvenues \! Si vous avez des idées d'amélioration
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT - voir le fichier [LICENSE](https://www.google.com/search?q=LICENSE) pour plus de détails.
+Ce projet est sous licence MIT - voir le fichier [LICENSE](./LICENSE) pour plus de détails.
 
 -----
 
