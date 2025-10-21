@@ -12,6 +12,8 @@ use Exception;
  * en la configurant spécifiquement pour les besoins de l'API Jamf.
  *
  * @package Beriyack\Jamf
+ * @author Beriyack
+ * @version 1.0.0
  */
 class JamfApiClient
 {
